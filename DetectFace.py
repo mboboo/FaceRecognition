@@ -10,7 +10,7 @@ class DetectedFace:
         self.camera = camera
 
     # function that runs in a loop unless no default camera is detected
-    def DetectFaceInLatestFrame(self):
+    def DetectFaceInLastFrame(self):
         # get every frame from the camera
         _, frame = self.camera.read()
         # convert every frame to gray image ( OpenCV expects gray images)

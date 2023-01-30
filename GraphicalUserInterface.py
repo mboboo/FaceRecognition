@@ -9,51 +9,59 @@ import cv2
 from PIL import Image, ImageTk
 
 class GUI():
-
+    # set theme 
     customtkinter.set_appearance_mode("dark")
     customtkinter.set_default_color_theme("dark-blue")
 
+    # set main window
     root = customtkinter.CTk()
+    # set size of the main window
     root.geometry("1200x800")
+    # set name of main window
+    root.title("Face Detection")
 
+    # create a frame on the main window
     frame = customtkinter.CTkFrame(master=root)
+    # set margins for the frame
     frame.pack(pady=20, padx=60, fill="both", expand=True)
 
-    cameraLabel = customtkinter.CTkLabel(master=frame)
+    # create a label to display the camera
+    cameraLabel = customtkinter.CTkLabel(master=frame, text="")
     cameraLabel.pack()
     
-    def Run(self):
+    # open default camera
+    camera = cv2.VideoCapture(0)
+    
+    def ShowFrames(self):
         # get the path for Haar cascade
         cascade_path = pathlib.Path(cv2.__file__).parent.absolute() / "data/haarcascade_frontalface_default.xml"
         # load OpenCV detector ( Haar classifier is slow, but accurate )
         classifier = cv2.CascadeClassifier(str(cascade_path))
-        # open default camera
-        camera = cv2.VideoCapture(0)
         # check if there is a camera
-        if camera.isOpened():
+        if self.camera.isOpened():
             # create object to detect faces
-            detectFace = DetectedFace(cascade_path, classifier, camera)
-            while True:
-                # wait for input ('q') to close the window
-                if cv2.waitKey(1) == ord("q"):
-                    break
-
-                # get last frame from camera
-                cv2LastFrame = detectFace.DetectFaceInLatestFrame()
-                # convert to PIL.Image
-                img = Image.fromarray(cv2LastFrame)
-                # convert to Tkinter image format
-                imageTk = ImageTk.PhotoImage(image=img)
-                # display last frame
-                self.cameraLabel.configure(image=imageTk)
-                self.root.mainloop()
+            detectFace = DetectedFace(cascade_path, classifier, self.camera)
+            # get last frame from camera
+            cv2LastFrame = detectFace.DetectFaceInLastFrame()
+            # convert to PIL.Image
+            img = Image.fromarray(cv2LastFrame)
+            # convert to Tkinter image format
+            imageTk = ImageTk.PhotoImage(image=img)
+            
+            # display last frame
+            self.cameraLabel.configure(image=imageTk)
+            # repeat after an interval of x ms to capture continuously
+            self.cameraLabel.after(10, self.ShowFrames)
+            
         else:
+            # close capturing device
+            self.camera.release()
+            # close all windows
+            cv2.destroyAllWindows()
             # if there is no default camera an exception is raised
             raise Exception("[Camera must be open]")
-
         
-       
-        # close capturing device
-        self.camera.release()
-        # close all windows
-        cv2.destroyAllWindows()
+    def Run(self):
+        while True:
+            self.ShowFrames()
+            self.root.mainloop()
