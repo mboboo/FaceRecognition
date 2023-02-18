@@ -2,7 +2,6 @@ import cv2
 
 # class to detect face using OpenCV
 class DetectedFace:
-
     # parameterized constructor
     def __init__(self, cascade_path, classifier, camera):
         self.cascade_path = cascade_path
@@ -33,4 +32,4 @@ class DetectedFace:
         for (x, y, width, height) in faces:
             cv2.rectangle(frame, (x, y), (x + width, y + height), (0, 255, 0), 3)
 
-        return frame
+        return frame, len(faces)
