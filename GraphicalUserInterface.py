@@ -29,6 +29,9 @@ class GUI():
     cameraLabel = customtkinter.CTkLabel(master=frame, text="")
     cameraLabel.pack()
     
+    indexLabel = customtkinter.CTkLabel(master=frame, text="Index: ")
+    indexLabel.pack()
+    
     # open default camera
     camera = cv2.VideoCapture(0)
     
@@ -39,19 +42,23 @@ class GUI():
         classifier = cv2.CascadeClassifier(str(cascade_path))
         # check if there is a camera
         if self.camera.isOpened():
-            # create object to detect faces
-            detectFace = DetectedFace(cascade_path, classifier, self.camera)
-            # get last frame from camera
-            cv2LastFrame = detectFace.DetectFaceInLastFrame()
-            # convert to PIL.Image
-            img = Image.fromarray(cv2LastFrame)
-            # convert to Tkinter image format
-            imageTk = ImageTk.PhotoImage(image=img)
-            
-            # display last frame
-            self.cameraLabel.configure(image=imageTk)
-            # repeat after an interval of x ms to capture continuously
-            self.cameraLabel.after(10, self.ShowFrames)
+            if self.frame.winfo_exists():
+                # create object to detect faces
+                detectFace = DetectedFace(cascade_path, classifier, self.camera)
+                # get last frame from camera
+                cv2LastFrame, numberOfFaces = detectFace.DetectFaceInLastFrame()
+                # convert frame to RGB
+                cv2LastFrame = cv2.cvtColor(cv2LastFrame, cv2.COLOR_BGR2RGB)
+                # convert frame to PIL.Image
+                img = Image.fromarray(cv2LastFrame)
+                # convert frame to Tkinter image format
+                imageTk = ImageTk.PhotoImage(image=img)            
+                # display last frame
+                self.cameraLabel.configure(image=imageTk)
+                # update index label to show ID of face
+                self.indexLabel.configure(text=f"Index: {numberOfFaces}")
+                # repeat after an interval of ms to capture continuously
+                self.cameraLabel.after(10, self.ShowFrames)               
             
         else:
             # close capturing device

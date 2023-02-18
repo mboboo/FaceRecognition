@@ -1,11 +1,4 @@
-# import pathlib module to manipulate paths
-import pathlib
-# import OpenCV module
-import cv2
-
-# import DetectedFace class
-from DetectFace import DetectedFace
-
+# import GUI class
 from GraphicalUserInterface import GUI
 
 
